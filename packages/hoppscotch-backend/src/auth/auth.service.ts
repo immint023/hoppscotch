@@ -377,4 +377,32 @@ export class AuthService {
 
     return E.right(<IsAdmin>{ isAdmin: false });
   }
+
+  /**
+   * @Customed
+   * Sign in user through admin privileges without permission
+   */
+  async signInUserThroughAdmin(userEmail: string) {
+    const queriedUser = await this.usersService.findUserByEmail(userEmail);
+    let user: AuthUser;
+
+    if (O.isNone(queriedUser)) {
+      return E.left({
+        message: USER_NOT_FOUND,
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    } else {
+      user = queriedUser.value;
+    }
+
+    const generatedAuthTokens = await this.generateAuthTokens(user.uid);
+    if (E.isLeft(generatedAuthTokens)) {
+      return E.left({
+        message: generatedAuthTokens.left.message,
+        statusCode: generatedAuthTokens.left.statusCode,
+      });
+    }
+
+    return E.right(generatedAuthTokens.right);
+  }
 }

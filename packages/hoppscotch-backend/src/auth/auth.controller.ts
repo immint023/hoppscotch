@@ -37,6 +37,13 @@ import { AUTH_PROVIDER_NOT_SPECIFIED } from 'src/errors';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Post('sigin-in-by-admin')
+  async signInByAdmin(@Body() data: { email: string }) {
+    const result = await this.authService.signInUserThroughAdmin(data.email);
+    if (E.isLeft(result)) throwHTTPErr(result.left);
+    return result.right;
+  }
+
   /**
    ** Route to initiate magic-link auth for a users email
    */
